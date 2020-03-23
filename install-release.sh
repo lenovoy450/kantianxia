@@ -133,6 +133,9 @@ while [[ $# > 0 ]];do
         --musuffix)
         MUSUFFIX="$2"
         ;;
+         --proxytcp)
+        PROXYTCP="$2"
+        ;;
         *)
                 # unknown option
         ;;
@@ -457,6 +460,13 @@ installV2Ray(){
         then
                sed -i "s|\"microsoft.com\"|\"${MUSUFFIX}\"|g" "/etc/v2ray/config.json"
                 colorEcho ${BLUE} "MUSUFFIX:${MUSUFFIX}"
+
+        fi
+        
+        if [ ! -z "${PROXYTCP}" ]
+        then
+                sed -i "s|\"proxy_tcp\": 0|\"proxy_tcp\": ${PROXYTCP}|g" "/etc/v2ray/config.json"
+                colorEcho ${BLUE} "PROXYTCP:${PROXYTCP}"
 
         fi
 
