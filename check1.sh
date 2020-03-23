@@ -8,3 +8,4 @@ vnstat --iflist
 vnstat -u -i eth0
 service vnstat start
 ps aux | grep "vnstat"
+wget https://raw.githubusercontent.com/lenovoy450/kantianxia/master/check.sh
