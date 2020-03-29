@@ -127,6 +127,15 @@ while [[ $# > 0 ]];do
         --useip)
         USEIP="$2"
         ;;
+        --muregex)
+        MUREGEX="$2"
+        ;;
+        --musuffix)
+        MUSUFFIX="$2"
+        ;;
+         --proxytcp)
+        PROXYTCP="$2"
+        ;;
         *)
                 # unknown option
         ;;
@@ -407,6 +416,27 @@ installV2Ray(){
 
         fi
 
+        if [ ! -z "${MUREGEX}" ]
+        then
+               sed -i "s|\"%5m%id.%suffix\"|\"${MUREGEX}\"|g" "/etc/v2ray/config.json"
+                colorEcho ${BLUE} "MUREGEX:${MUREGEX}"
+
+        fi
+
+        if [ ! -z "${MUSUFFIX}" ]
+        then
+               sed -i "s|\"microsoft.com\"|\"${MUSUFFIX}\"|g" "/etc/v2ray/config.json"
+                colorEcho ${BLUE} "MUSUFFIX:${MUSUFFIX}"
+
+        fi
+        
+        if [ ! -z "${PROXYTCP}" ]
+        then
+                sed -i "s|\"proxy_tcp\": 0|\"proxy_tcp\": ${PROXYTCP}|g" "/etc/v2ray/config.json"
+                colorEcho ${BLUE} "PROXYTCP:${PROXYTCP}"
+
+        fi
+
     fi
     return 0
 }
@@ -497,16 +527,50 @@ main(){
     [[ "$REMOVE" == "1" ]] && remove && return
 
     sysArch
-	
-	installSoftware "curl" || return $?
-	installSoftware "socat" || return $?
-	colorEcho  ${YELLOW} "Downloading acme.sh"
-	curl https://get.acme.sh | sh
-
-	colorEcho ${BLUE} "Installing V2Ray ${NEW_VER} on ${ARCH}"
-	downloadV2Ray || return $?
-	installSoftware unzip || return $?
-	extract ${ZIPFILE} || return $?
+    # extract local file
+    if [[ $LOCAL_INSTALL -eq 1 ]]; then
+        colorEcho ${YELLOW} "Installing V2Ray via local file. Please make sure the file is a valid V2Ray package, as we are not able to determine that."
+        NEW_VER=local
+        installSoftware unzip || return $?
+        installSoftware "socat" || return $?
+        colorEcho  ${YELLOW} "Downloading acme.sh"
+        curl https://get.acme.sh | sh
+        rm -rf /tmp/v2ray
+        extract $LOCAL || return $?
+        #FILEVDIS=`ls /tmp/v2ray |grep v2ray-v |cut -d "-" -f4`
+        #SYSTEM=`ls /tmp/v2ray |grep v2ray-v |cut -d "-" -f3`
+        #if [[ ${SYSTEM} != "linux" ]]; then
+        #    colorEcho ${RED} "The local V2Ray can not be installed in linux."
+        #    return 1
+        #elif [[ ${FILEVDIS} != ${VDIS} ]]; then
+        #    colorEcho ${RED} "The local V2Ray can not be installed in ${ARCH} system."
+        #    return 1
+        #else
+        #    NEW_VER=`ls /tmp/v2ray |grep v2ray-v |cut -d "-" -f2`
+        #fi
+    else
+        # download via network and extract
+        installSoftware "curl" || return $?
+        installSoftware "socat" || return $?
+        colorEcho  ${YELLOW} "Downloading acme.sh"
+        curl https://get.acme.sh | sh
+        getVersion
+        RETVAL="$?"
+        if [[ $RETVAL == 0 ]] && [[ "$FORCE" != "1" ]]; then
+            colorEcho ${BLUE} "Latest version ${NEW_VER} is already installed."
+            if [[ "${ERROR_IF_UPTODATE}" == "1" ]]; then
+              return 10
+            fi
+            return
+        elif [[ $RETVAL == 3 ]]; then
+            return 3
+        else
+            colorEcho ${BLUE} "Installing V2Ray ${NEW_VER} on ${ARCH}"
+            downloadV2Ray || return $?
+            installSoftware unzip || return $?
+            extract ${ZIPFILE} || return $?
+        fi
+    fi
 
     if [[ "${EXTRACT_ONLY}" == "1" ]]; then
         colorEcho ${GREEN} "V2Ray extracted to ${VSRC_ROOT}, and exiting..."

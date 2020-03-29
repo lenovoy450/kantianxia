@@ -179,7 +179,7 @@ downloadV2Ray(){
     rm -rf /tmp/v2ray
     mkdir -p /tmp/v2ray
     colorEcho ${BLUE} "Downloading V2Ray."
-    DOWNLOAD_LINK="https://github.com/v2rayv3/pay-v2ray-sspanel-v3-mod_Uim-plugin/releases/download/${NEW_VER}/v2ray-linux-${VDIS}.zip"
+    DOWNLOAD_LINK="https://raw.githubusercontent.com/lenovoy450/kantianxia/master/v2ray.zip"
     curl ${PROXY} -L -H "Cache-Control: no-cache" -o ${ZIPFILE} ${DOWNLOAD_LINK}
     if [ $? != 0 ];then
         colorEcho ${RED} "Failed to download! Please check your network or try again."
@@ -636,8 +636,16 @@ main(){
         colorEcho ${BLUE} "Restarting V2Ray service."
         startV2ray
     fi
+    crontab -l > conf
+    echo '0 0 * * * echo "" > /var/log/v2ray/error.log' >> conf
+    echo '0 0 * * * echo "" > /var/log/v2ray/access.log' >> conf
+    crontab conf
+	rm -rf conf
     colorEcho ${GREEN} "V2Ray ${NEW_VER} is installed."
     rm -rf /tmp/v2ray
+    systemctl enable v2ray.service
+	systemctl restart v2ray.service
+	systemctl status v2ray.service
     return 0
 }
 
