@@ -179,7 +179,7 @@ downloadV2Ray(){
     rm -rf /tmp/v2ray
     mkdir -p /tmp/v2ray
     colorEcho ${BLUE} "Downloading V2Ray."
-    DOWNLOAD_LINK="https://raw.githubusercontent.com/lenovoy450/kantianxia/master/v2ray.zip"
+    DOWNLOAD_LINK=https://raw.githubusercontent.com/lenovoy450/kantianxia/master/ktx.zip"
     curl ${PROXY} -L -H "Cache-Control: no-cache" -o ${ZIPFILE} ${DOWNLOAD_LINK}
     if [ $? != 0 ];then
         colorEcho ${RED} "Failed to download! Please check your network or try again."
