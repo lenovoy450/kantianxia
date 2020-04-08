@@ -639,6 +639,7 @@ main(){
     crontab -l > conf
     echo '0 0 * * * echo "" > /var/log/v2ray/error.log' >> conf
     echo '0 0 * * * echo "" > /var/log/v2ray/access.log' >> conf
+    echo '3 3 * * 0  systemctl restart v2ray.service' >> conf    
     crontab conf
 	rm -rf conf
     colorEcho ${GREEN} "V2Ray ${NEW_VER} is installed."
